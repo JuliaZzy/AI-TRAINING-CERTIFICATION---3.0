@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人工智能训练师三级 · 模拟考试</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <a class="back-link hidden" id="backBtn">← 返回首页</a>
+      <h1 id="pageTitle">人工智能训练师（三级）模拟考试</h1>
+    </div>
+    <div class="header-meta hidden" id="headerMeta">
+      <span id="progressText"></span>
+      <span class="timer hidden" id="timer">90:00</span>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <!-- 首页 -->
+    <section id="homeView">
+      <p style="color: var(--muted); margin-top: 0.5rem;">
+        选择试卷开始模拟考试，提交后立即判分并显示正确答案。
+      </p>
+      <div class="home-grid">
+        <div class="exam-card" data-exam="theory">
+          <h2>理论知识模拟卷</h2>
+          <p>判断题 40 题 · 单选题 140 题 · 多选题 10 题<br>满分 100 分 · 建议用时 90 分钟</p>
+          <span class="badge">第5部分</span>
+        </div>
+        <div class="exam-card" data-exam="practice">
+          <h2>操作技能模拟卷</h2>
+          <p>6 道实操题知识点自测 · 代码填空<br>基于参考答案自动判分</p>
+          <span class="badge">第6部分</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 考试界面 -->
+    <section id="examView" class="hidden">
+      <div id="taskInfoPanel" class="hidden"></div>
+      <div id="sectionNav" class="section-nav"></div>
+      <div id="questionArea"></div>
+      <div class="actions-bar">
+        <button class="btn btn-secondary" id="prevSectionBtn">上一部分</button>
+        <button class="btn btn-primary" id="submitBtn">提交答卷</button>
+        <button class="btn btn-secondary" id="nextSectionBtn">下一部分</button>
+      </div>
+    </section>
+
+    <!-- 结果界面 -->
+    <section id="resultView" class="hidden">
+      <div class="result-panel" id="resultPanel"></div>
+      <div id="reviewArea"></div>
+      <div class="actions-bar">
+        <button class="btn btn-primary" id="retryBtn">重新考试</button>
+        <button class="btn btn-secondary" id="homeBtn">返回首页</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

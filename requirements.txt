@@ -1,0 +1,13 @@
+pandas==2.1.4
+openpyxl
+numpy<2
+matplotlib
+seaborn
+scikit-learn
+xgboost
+joblib
+onnxruntime
+opencv-python
+pillow
+scipy
+ipykernel
