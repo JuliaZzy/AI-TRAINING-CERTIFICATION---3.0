@@ -1,0 +1,71 @@
+.hero-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  margin-bottom: 16rpx;
+}
+
+.hero-desc {
+  color: #8b9cb3;
+  font-size: 26rpx;
+  margin-bottom: 12rpx;
+}
+
+.hero-meta {
+  color: #93c5fd;
+  font-size: 24rpx;
+  margin-bottom: 28rpx;
+}
+
+.start-all {
+  width: 100%;
+}
+
+.section-title {
+  font-size: 28rpx;
+  color: #8b9cb3;
+  margin: 12rpx 0 20rpx;
+}
+
+.chapter {
+  position: relative;
+}
+
+.chapter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.chapter-code {
+  background: #243044;
+  color: #93c5fd;
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+}
+
+.chapter-count {
+  color: #8b9cb3;
+  font-size: 24rpx;
+}
+
+.chapter-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  padding-right: 120rpx;
+}
+
+.chapter-action {
+  position: absolute;
+  right: 32rpx;
+  bottom: 32rpx;
+  color: #3b82f6;
+  font-size: 26rpx;
+}
+
+.footer-tip {
+  text-align: center;
+  font-size: 24rpx;
+  padding: 24rpx 0 48rpx;
+}

@@ -1,0 +1,23 @@
+<view class="container">
+  <view class="hero card">
+    <view class="hero-title">{{title}}</view>
+    <view class="hero-desc">{{description}}</view>
+    <view class="hero-meta">共 {{totalQuestions}} 题 · 满分 {{totalScore}} 分</view>
+    <button class="btn-primary start-all" bindtap="startAll">开始全部练习</button>
+  </view>
+
+  <view class="section-title">按章节练习</view>
+
+  <block wx:for="{{chapters}}" wx:key="code">
+    <view class="chapter card" bindtap="startChapter" data-code="{{item.code}}">
+      <view class="chapter-head">
+        <text class="chapter-code">{{item.code}}</text>
+        <text class="chapter-count">{{item.count}} 题 · {{item.score}} 分</text>
+      </view>
+      <view class="chapter-name">{{item.name}}</view>
+      <view class="chapter-action">开始练习 ›</view>
+    </view>
+  </block>
+
+  <view class="footer-tip muted">提示：本题库为代码填空练习，无需 Python 环境即可刷题。</view>
+</view>

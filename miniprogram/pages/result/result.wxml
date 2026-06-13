@@ -1,0 +1,46 @@
+<view class="container">
+  <view class="score-card card">
+    <view class="score-title">{{title}}</view>
+    <view class="score-main">
+      <text class="score-num">{{totalScore}}</text>
+      <text class="score-slash">/</text>
+      <text class="score-max">{{maxScore}}</text>
+    </view>
+    <view class="score-sub">共 {{totalCount}} 题</view>
+  </view>
+
+  <view class="stats card">
+    <view class="stat-item ok">
+      <view class="stat-num">{{correctCount}}</view>
+      <view class="stat-label">正确</view>
+    </view>
+    <view class="stat-item bad">
+      <view class="stat-num">{{wrongCount}}</view>
+      <view class="stat-label">错误</view>
+    </view>
+    <view class="stat-item pending">
+      <view class="stat-num">{{unansweredCount}}</view>
+      <view class="stat-label">未答</view>
+    </view>
+  </view>
+
+  <view class="section-title">答题详情</view>
+
+  <block wx:for="{{details}}" wx:key="id">
+    <view class="detail card">
+      <view class="detail-head">
+        <text class="tag">{{item.taskCode}}</text>
+        <text class="status {{item.statusClass}}">{{item.statusText}} · {{item.earned}}/{{item.score}}分</text>
+      </view>
+      <view class="detail-text">{{item.text}}</view>
+      <view wx:if="{{!item.unanswered && !item.correct}}" class="detail-answer">
+        参考答案：{{item.expectedText}}
+      </view>
+    </view>
+  </block>
+
+  <view class="bottom-actions">
+    <button class="btn-primary action-btn" bindtap="retrySame">返回查看解析</button>
+    <button class="btn-secondary action-btn" bindtap="backHome">回到首页</button>
+  </view>
+</view>

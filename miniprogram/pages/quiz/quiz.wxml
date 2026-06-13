@@ -1,0 +1,85 @@
+<view class="container">
+  <view class="top-bar card">
+    <view class="top-title">{{title}}</view>
+    <view class="top-meta">已答 {{progressText}} 题</view>
+  </view>
+
+  <block wx:for="{{questions}}" wx:key="id" wx:for-item="question" wx:for-index="qIndex">
+    <view class="question card {{submitted ? (question._status || '') : ''}}">
+      <view class="q-head">
+        <text class="q-index">第 {{qIndex + 1}} 题</text>
+        <text class="q-score">{{question.score}} 分</text>
+      </view>
+      <text class="tag">{{question.taskCode}}</text>
+      <view class="q-text">{{question.text}}</view>
+
+      <view wx:if="{{question.hint}}" class="q-hint">提示：{{question.hint}}</view>
+
+      <!-- 单选题 -->
+      <view wx:if="{{question.type === 'single'}}" class="options">
+        <view
+          wx:for="{{question.optionList}}"
+          wx:key="key"
+          wx:for-item="opt"
+          class="option {{answers[question.id] === opt.key ? 'selected' : ''}} {{submitted && opt.key === question.answer ? 'correct' : ''}} {{submitted && answers[question.id] === opt.key && opt.key !== question.answer ? 'wrong' : ''}}"
+          bindtap="onSingleSelect"
+          data-qid="{{question.id}}"
+          data-value="{{opt.key}}"
+        >
+          <text class="opt-key">{{opt.key}}.</text>
+          <text>{{opt.label}}</text>
+        </view>
+      </view>
+
+      <!-- 多选题 -->
+      <view wx:if="{{question.type === 'multiple'}}" class="options">
+        <view
+          wx:for="{{question.optionList}}"
+          wx:key="key"
+          wx:for-item="opt"
+          class="option {{question.selectedMap[opt.key] ? 'selected' : ''}}"
+          bindtap="onMultipleToggle"
+          data-qid="{{question.id}}"
+          data-value="{{opt.key}}"
+        >
+          <text class="opt-key">{{opt.key}}.</text>
+          <text>{{opt.label}}</text>
+        </view>
+      </view>
+
+      <!-- 填空题 -->
+      <view wx:if="{{question.type === 'fill'}}" class="code-block">
+        <view class="code-line">
+          <block wx:for="{{question.segments}}" wx:key="index" wx:for-item="seg">
+            <text wx:if="{{seg.type === 'text'}}" class="code-text">{{seg.value}}</text>
+            <input
+              wx:else
+              class="code-input {{submitted ? (seg.correct ? 'input-correct' : 'input-wrong') : ''}}"
+              value="{{seg.value}}"
+              placeholder="填空{{seg.index + 1}}"
+              disabled="{{submitted}}"
+              bindinput="onFillInput"
+              data-qid="{{question.id}}"
+              data-index="{{seg.index}}"
+            />
+          </block>
+        </view>
+      </view>
+
+      <view wx:if="{{submitted && question.type === 'fill'}}" class="answer-box">
+        <text class="answer-label">参考答案：</text>
+        <text>{{question.blanks.join(' / ')}}</text>
+      </view>
+
+      <view wx:if="{{submitted && question.type === 'multiple'}}" class="answer-box">
+        <text class="answer-label">参考答案：</text>
+        <text>{{question.answer.join('、')}}</text>
+      </view>
+    </view>
+  </block>
+
+  <view class="bottom-actions">
+    <button wx:if="{{!submitted}}" class="btn-primary submit-btn" bindtap="submitQuiz">提交答卷</button>
+    <button wx:else class="btn-secondary submit-btn" bindtap="retryQuiz">重新练习</button>
+  </view>
+</view>

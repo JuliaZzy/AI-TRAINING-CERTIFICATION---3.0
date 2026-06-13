@@ -1,0 +1,16 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/quiz/quiz",
+    "pages/result/result"
+  ],
+  "window": {
+    "navigationBarTitleText": "AI训练师三级练习",
+    "navigationBarBackgroundColor": "#1a2332",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0f1419",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
