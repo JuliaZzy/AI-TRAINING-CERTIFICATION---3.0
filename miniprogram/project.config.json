@@ -1,5 +1,5 @@
 {
-  "description": "人工智能训练师三级 - 代码填空练习",
+  "description": "QuestMind - 人工智能训练师三级题库",
   "packOptions": {
     "ignore": [],
     "include": []
@@ -47,7 +47,8 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "3.3.4",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "libVersion": "3.16.1",
   "appid": "wx1bbb9d7ad831d2e6",
   "projectname": "ai-trainer-fill-quiz",
   "condition": {},

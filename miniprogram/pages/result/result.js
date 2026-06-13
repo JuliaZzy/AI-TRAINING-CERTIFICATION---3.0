@@ -39,7 +39,7 @@ Page({
   },
 
   backHome() {
-    wx.reLaunch({ url: '/pages/index/index' });
+    wx.switchTab({ url: '/pages/library/library' });
   },
 
   retrySame() {

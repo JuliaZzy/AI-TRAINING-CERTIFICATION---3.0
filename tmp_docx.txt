@@ -1,0 +1,48 @@
+﻿python : Traceback (most recent call last):
+所在位置 C:\Users\Julia_zzy\AppData\Local\Temp\ps-script-ef6f15a8-922e-4214-a8ac-e3c893567d55.ps1:106 字符: 20
++ chcp 65001 >$null; python -c "
++                    ~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "<string>", line 16, in <module>
+UnicodeEncodeError: 'gbk' codec can't encode character '\xb2' in position 8: illegal multibyte sequence
+=== 2.2.1 ===
+请勿修改答题卷，在指定单元格内填写答案
+针对Logistic模型
+1、模型性能
+2、错误分析
+3、改进建议
+-- table 0 --
+['', 'precision', 'recall', 'f1-score', 'support']
+['0（没有严重逾期）', '', '', '', '']
+['1（有严重逾期）', '', '', '', '']
+-- table 1 --
+['']
+-- table 2 --
+['']
+
+=== 2.2.2 ===
+请勿修改答题卷，在指定单元格内填写答案
+针对线性回归模型
+1、模型性能
+2、错误分析
+3、改进建议
+-- table 0 --
+['训练集得分', '']
+['测试集得分', '']
+-- table 1 --
+['']
+-- table 2 --
+['']
+
+=== 2.2.3 ===
+请勿修改答题卷，在指定单元格内填写答案
+针对随机森林模型
+1、模型性能
+2、错误分析
+3、改进建议
+-- table 0 --
+['训练集得分', '']
+['测试集得分', '']
+['均方误差（MSE）', '']

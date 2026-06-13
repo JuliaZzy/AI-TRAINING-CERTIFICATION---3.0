@@ -41,7 +41,22 @@ function isFillCorrect(question, userAnswers) {
 }
 
 function gradeQuestion(question, userAnswer) {
+  if (question.type === 'judge') {
+    if (question.answer == null) {
+      return { correct: false, score: 0, unanswered: !userAnswer, pending: true };
+    }
+    const correct = userAnswer === question.answer;
+    return {
+      correct,
+      score: correct ? question.score : 0,
+      unanswered: !userAnswer
+    };
+  }
+
   if (question.type === 'single') {
+    if (question.answer == null) {
+      return { correct: false, score: 0, unanswered: !userAnswer, pending: true };
+    }
     const correct = userAnswer === question.answer;
     return {
       correct,
@@ -51,6 +66,14 @@ function gradeQuestion(question, userAnswer) {
   }
 
   if (question.type === 'multiple') {
+    if (question.answer == null) {
+      return {
+        correct: false,
+        score: 0,
+        unanswered: !(userAnswer && userAnswer.length),
+        pending: true
+      };
+    }
     const expected = (question.answer || []).slice().sort().join(',');
     const actual = (userAnswer || []).slice().sort().join(',');
     const correct = expected === actual && expected.length > 0;

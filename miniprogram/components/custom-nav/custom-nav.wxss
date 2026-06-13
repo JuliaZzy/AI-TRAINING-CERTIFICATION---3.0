@@ -1,0 +1,80 @@
+.custom-nav {
+  flex-shrink: 0;
+  width: 100%;
+  background: rgba(255, 248, 248, 0.98);
+  border-bottom: 1rpx solid rgba(219, 192, 196, 0.35);
+}
+
+.status-bar {
+  width: 100%;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding-left: 24rpx;
+  box-sizing: border-box;
+}
+
+.nav-brand-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #ff85a2;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #a03a57;
+  line-height: 1;
+}
+
+.nav-title-back {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-action {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a03a57;
+  font-size: 36rpx;
+  flex-shrink: 0;
+}
+
+.nav-btn {
+  border-radius: 50%;
+  background: #fff;
+  border: 1rpx solid rgba(219, 192, 196, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  line-height: 1;
+  color: #554245;
+  flex-shrink: 0;
+}

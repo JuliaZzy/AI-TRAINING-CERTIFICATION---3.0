@@ -1,0 +1,55 @@
+<view class="page">
+  <custom-nav mode="brand" title="{{meta.title}}" />
+
+  <view class="container">
+    <view class="search-wrap">
+      <text class="search-icon">⌕</text>
+      <input
+        class="search-input"
+        placeholder="搜索题型或知识点..."
+        value="{{search}}"
+        bindinput="onSearchInput"
+      />
+    </view>
+
+    <view class="download-card" bindtap="onDownloadTap">
+      <view>
+        <view class="download-title">资料下载</view>
+        <view class="download-desc">Get all study materials at once!</view>
+      </view>
+      <view class="download-icon">↓</view>
+    </view>
+
+    <view class="section-title">QUESTION TYPES</view>
+    <view class="bento-grid">
+      <block wx:for="{{types}}" wx:key="key">
+        <view
+          class="type-card"
+          bindtap="startType"
+          data-type="{{item.key}}"
+        >
+          <view class="type-icon-wrap">
+            <text class="type-icon">{{item.key === 'judge' ? '✓' : item.key === 'single' ? '◉' : item.key === 'multiple' ? '☑' : '✎'}}</text>
+          </view>
+          <view class="type-info">
+            <text class="type-name">{{item.name}}</text>
+            <text class="type-en">{{item.en}} · {{item.count}} 题</text>
+          </view>
+          <view class="difficulty {{item.difficulty}}">{{item.difficulty}}</view>
+        </view>
+      </block>
+    </view>
+
+    <view class="section-title">DAILY QUESTS</view>
+    <view class="daily-card card">
+      <view class="daily-icon">◎</view>
+      <view class="daily-info">
+        <view class="daily-title">{{dailyQuest.title}}</view>
+        <view class="daily-desc">{{dailyQuest.desc}}</view>
+      </view>
+      <view class="progress-ring">
+        <text>{{dailyQuest.progress}}%</text>
+      </view>
+    </view>
+  </view>
+</view>

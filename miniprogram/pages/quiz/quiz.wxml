@@ -1,85 +1,98 @@
-<view class="container">
-  <view class="top-bar card">
-    <view class="top-title">{{title}}</view>
-    <view class="top-meta">已答 {{progressText}} 题</view>
-  </view>
-
-  <block wx:for="{{questions}}" wx:key="id" wx:for-item="question" wx:for-index="qIndex">
-    <view class="question card {{submitted ? (question._status || '') : ''}}">
-      <view class="q-head">
-        <text class="q-index">第 {{qIndex + 1}} 题</text>
-        <text class="q-score">{{question.score}} 分</text>
-      </view>
-      <text class="tag">{{question.taskCode}}</text>
-      <view class="q-text">{{question.text}}</view>
-
-      <view wx:if="{{question.hint}}" class="q-hint">提示：{{question.hint}}</view>
-
-      <!-- 单选题 -->
-      <view wx:if="{{question.type === 'single'}}" class="options">
-        <view
-          wx:for="{{question.optionList}}"
-          wx:key="key"
-          wx:for-item="opt"
-          class="option {{answers[question.id] === opt.key ? 'selected' : ''}} {{submitted && opt.key === question.answer ? 'correct' : ''}} {{submitted && answers[question.id] === opt.key && opt.key !== question.answer ? 'wrong' : ''}}"
-          bindtap="onSingleSelect"
-          data-qid="{{question.id}}"
-          data-value="{{opt.key}}"
-        >
-          <text class="opt-key">{{opt.key}}.</text>
-          <text>{{opt.label}}</text>
-        </view>
-      </view>
-
-      <!-- 多选题 -->
-      <view wx:if="{{question.type === 'multiple'}}" class="options">
-        <view
-          wx:for="{{question.optionList}}"
-          wx:key="key"
-          wx:for-item="opt"
-          class="option {{question.selectedMap[opt.key] ? 'selected' : ''}}"
-          bindtap="onMultipleToggle"
-          data-qid="{{question.id}}"
-          data-value="{{opt.key}}"
-        >
-          <text class="opt-key">{{opt.key}}.</text>
-          <text>{{opt.label}}</text>
-        </view>
-      </view>
-
-      <!-- 填空题 -->
-      <view wx:if="{{question.type === 'fill'}}" class="code-block">
-        <view class="code-line">
-          <block wx:for="{{question.segments}}" wx:key="index" wx:for-item="seg">
-            <text wx:if="{{seg.type === 'text'}}" class="code-text">{{seg.value}}</text>
-            <input
-              wx:else
-              class="code-input {{submitted ? (seg.correct ? 'input-correct' : 'input-wrong') : ''}}"
-              value="{{seg.value}}"
-              placeholder="填空{{seg.index + 1}}"
-              disabled="{{submitted}}"
-              bindinput="onFillInput"
-              data-qid="{{question.id}}"
-              data-index="{{seg.index}}"
-            />
-          </block>
-        </view>
-      </view>
-
-      <view wx:if="{{submitted && question.type === 'fill'}}" class="answer-box">
-        <text class="answer-label">参考答案：</text>
-        <text>{{question.blanks.join(' / ')}}</text>
-      </view>
-
-      <view wx:if="{{submitted && question.type === 'multiple'}}" class="answer-box">
-        <text class="answer-label">参考答案：</text>
-        <text>{{question.answer.join('、')}}</text>
+<view class="page">
+  <custom-nav mode="back" title="{{progressText}}" bind:back="onBack">
+    <text slot="right" class="nav-skip" bindtap="onSkip">Skip</text>
+    <view slot="footer" class="progress-footer">
+      <view class="progress-track">
+        <view class="progress-fill" style="width: {{progress}}%"></view>
       </view>
     </view>
-  </block>
+  </custom-nav>
 
-  <view class="bottom-actions">
-    <button wx:if="{{!submitted}}" class="btn-primary submit-btn" bindtap="submitQuiz">提交答卷</button>
-    <button wx:else class="btn-secondary submit-btn" bindtap="retryQuiz">重新练习</button>
+  <view class="container" wx:if="{{current}}">
+    <view class="quest-card card">
+      <view class="question-text">{{current.text}}</view>
+      <view class="hint-btn" bindtap="toggleHint">
+        <text>💡 Hint</text>
+      </view>
+      <view wx:if="{{hintVisible}}" class="hint-box">
+        提示：仔细审题，关注题干中的关键词。
+      </view>
+    </view>
+
+    <!-- 判断题 -->
+    <view wx:if="{{type === 'judge'}}" class="options">
+      <view
+        class="option {{selected === 'T' ? 'selected' : ''}}"
+        bindtap="onJudgeSelect"
+        data-value="T"
+      >
+        <view class="opt-key">√</view>
+        <text>正确</text>
+      </view>
+      <view
+        class="option {{selected === 'F' ? 'selected' : ''}}"
+        bindtap="onJudgeSelect"
+        data-value="F"
+      >
+        <view class="opt-key">×</view>
+        <text>错误</text>
+      </view>
+    </view>
+
+    <!-- 单选题 -->
+    <view wx:elif="{{type === 'single'}}" class="options">
+      <view
+        wx:for="{{optionList}}"
+        wx:key="key"
+        class="option {{selected === item.key ? 'selected' : ''}}"
+        bindtap="onSingleSelect"
+        data-value="{{item.key}}"
+      >
+        <view class="opt-key">{{item.key}}</view>
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+
+    <!-- 多选题 -->
+    <view wx:elif="{{type === 'multiple'}}" class="options">
+      <view
+        wx:for="{{optionList}}"
+        wx:key="key"
+        class="option {{selectedMap[item.key] ? 'selected' : ''}}"
+        bindtap="onMultipleToggle"
+        data-value="{{item.key}}"
+      >
+        <view class="opt-key">{{item.key}}</view>
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+
+    <button
+      class="submit-btn btn-primary"
+      disabled="{{!selected && !selectedList.length}}"
+      bindtap="submitAnswer"
+    >Check Answer</button>
+
+    <question-comments
+      wx:if="{{current}}"
+      question-type="{{type}}"
+      question-id="{{current.id}}"
+    />
+  </view>
+
+  <view class="bottom-nav">
+    <button class="nav-action btn-secondary" bindtap="goPrev" disabled="{{!canGoPrev}}">‹ 上一题</button>
+    <button class="nav-action btn-primary" bindtap="goNext" disabled="{{!canGoNext}}">下一题 ›</button>
+  </view>
+
+  <view wx:if="{{showModal}}" class="modal-mask" bindtap="closeModal">
+    <view class="modal card" catchtap="">
+      <view class="modal-icon {{feedback.positive ? 'ok' : 'warn'}}">
+        {{feedback.positive ? '✓' : '!'}}
+      </view>
+      <view class="modal-title">{{feedback.title}}</view>
+      <view class="modal-desc">{{feedback.desc}}</view>
+      <button class="btn-primary modal-btn" bindtap="closeModal">Next Quest</button>
+    </view>
   </view>
 </view>

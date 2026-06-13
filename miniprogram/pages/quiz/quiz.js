@@ -1,167 +1,201 @@
-const practiceData = require('../../data/practice.js');
-const { prepareFillSegments, gradeExam } = require('../../utils/score.js');
+const { getQuestions, getQuestionById } = require('../../utils/questions.js');
+const { addRecord } = require('../../utils/wrongbook.js');
+const { gradeQuestion } = require('../../utils/score.js');
 
 function buildOptionList(question) {
-  return Object.keys(question.options || {}).map((key) => ({
+  if (!question.options) return [];
+  return Object.keys(question.options).map((key) => ({
     key,
     label: question.options[key]
   }));
 }
 
-function enrichQuestion(question, answers, submitted) {
-  const userAnswer = answers[question.id];
-  const item = {
-    ...question,
-    optionList: buildOptionList(question)
-  };
-
-  if (question.type === 'fill') {
-    item.segments = prepareFillSegments(
-      question.code,
-      question.blanks,
-      userAnswer || [],
-      submitted
-    );
-  }
-
-  if (question.type === 'multiple') {
-    item.selectedMap = {};
-    (userAnswer || []).forEach((key) => {
-      item.selectedMap[key] = true;
-    });
-  }
-
-  return item;
-}
-
 Page({
   data: {
-    title: '',
-    mode: 'all',
-    chapterCode: '',
-    submitted: false,
+    type: 'single',
     questions: [],
-    answers: {},
+    currentIndex: 0,
+    current: null,
+    optionList: [],
+    selected: '',
+    selectedList: [],
+    selectedMap: {},
+    progress: 0,
     progressText: '',
-    answeredCount: 0
+    hintVisible: false,
+    submitted: false,
+    feedback: null,
+    showModal: false
   },
 
   onLoad(options) {
-    const mode = options.mode || 'all';
-    const chapterCode = options.code || '';
-    const title = decodeURIComponent(options.title || '练习');
+    const type = options.type || 'single';
+    const questions = getQuestions(type);
+    let currentIndex = parseInt(options.index || '0', 10);
 
-    wx.setNavigationBarTitle({ title });
-
-    let questions = practiceData.quiz.slice();
-    if (mode === 'chapter' && chapterCode) {
-      questions = questions.filter((q) => q.taskCode === chapterCode);
+    if (options.id) {
+      const idx = questions.findIndex((q) => q.id === options.id);
+      if (idx >= 0) currentIndex = idx;
     }
 
     this.setData({
-      title,
-      mode,
-      chapterCode,
-      questions: questions.map((q) => enrichQuestion(q, {}, false)),
-      progressText: '0 / ' + questions.length
-    });
+      type,
+      questions,
+      currentIndex: Math.min(Math.max(currentIndex, 0), Math.max(questions.length - 1, 0))
+    }, () => this.loadCurrent());
   },
 
-  refreshQuestions(submitted) {
-    const { questions, answers } = this.data;
-    const answeredCount = questions.filter((q) => this.hasAnswer(q, answers[q.id])).length;
+  loadCurrent() {
+    const { questions, currentIndex } = this.data;
+    const current = questions[currentIndex];
+    if (!current) return;
+
+    const saved = wx.getStorageSync('questmind_answers_' + current.id) || {};
 
     this.setData({
-      submitted,
-      questions: questions.map((q) => enrichQuestion(q, answers, submitted)),
-      answeredCount,
-      progressText: answeredCount + ' / ' + questions.length
+      current,
+      optionList: buildOptionList(current),
+      selected: saved.selected || '',
+      selectedList: saved.selectedList || [],
+      selectedMap: saved.selectedMap || {},
+      progress: questions.length ? ((currentIndex + 1) / questions.length) * 100 : 0,
+      progressText: 'Question ' + (currentIndex + 1) + ' of ' + questions.length,
+      canGoPrev: currentIndex > 0,
+      canGoNext: currentIndex < questions.length - 1,
+      hintVisible: false,
+      submitted: false,
+      feedback: null,
+      showModal: false
     });
   },
 
-  hasAnswer(question, userAnswer) {
-    if (question.type === 'fill') {
-      return (userAnswer || []).some(Boolean);
-    }
-    if (question.type === 'multiple') {
-      return !!(userAnswer && userAnswer.length);
-    }
-    return !!userAnswer;
+  onBack() {
+    wx.navigateBack({ delta: 1 });
   },
 
-  onFillInput(e) {
-    if (this.data.submitted) return;
+  onSkip() {
+    this.goNext();
+  },
 
-    const { qid, index } = e.currentTarget.dataset;
-    const value = e.detail.value;
-    const answers = { ...this.data.answers };
-    const current = (answers[qid] || []).slice();
-    current[index] = value;
-    answers[qid] = current;
-
-    this.setData({ answers }, () => this.refreshQuestions(false));
+  toggleHint() {
+    this.setData({ hintVisible: !this.data.hintVisible });
   },
 
   onSingleSelect(e) {
     if (this.data.submitted) return;
+    const value = e.currentTarget.dataset.value;
+    this.setData({ selected: value });
+  },
 
-    const { qid, value } = e.currentTarget.dataset;
-    const answers = { ...this.data.answers, [qid]: value };
-    this.setData({ answers }, () => this.refreshQuestions(false));
+  onJudgeSelect(e) {
+    if (this.data.submitted) return;
+    const value = e.currentTarget.dataset.value;
+    this.setData({ selected: value });
   },
 
   onMultipleToggle(e) {
     if (this.data.submitted) return;
-
-    const { qid, value } = e.currentTarget.dataset;
-    const answers = { ...this.data.answers };
-    const current = (answers[qid] || []).slice();
-    const idx = current.indexOf(value);
-
+    const value = e.currentTarget.dataset.value;
+    const selectedList = this.data.selectedList.slice();
+    const idx = selectedList.indexOf(value);
     if (idx >= 0) {
-      current.splice(idx, 1);
+      selectedList.splice(idx, 1);
     } else {
-      current.push(value);
-      current.sort();
+      selectedList.push(value);
+      selectedList.sort();
     }
-
-    answers[qid] = current;
-    this.setData({ answers }, () => this.refreshQuestions(false));
+    const selectedMap = {};
+    selectedList.forEach((key) => { selectedMap[key] = true; });
+    this.setData({ selectedList, selectedMap });
   },
 
-  submitQuiz() {
-    const { questions, answers, submitted } = this.data;
-    if (submitted) return;
+  hasAnswer() {
+    const { type, selected, selectedList } = this.data;
+    if (type === 'multiple') return selectedList.length > 0;
+    return !!selected;
+  },
 
-    const unanswered = questions.filter((q) => !this.hasAnswer(q, answers[q.id])).length;
-    const doSubmit = () => {
-      const result = gradeExam(questions, answers);
-      wx.setStorageSync('last_quiz_result', {
-        title: this.data.title,
-        mode: this.data.mode,
-        chapterCode: this.data.chapterCode,
-        result,
-        answers
-      });
-      this.refreshQuestions(true);
-      wx.navigateTo({ url: '/pages/result/result' });
-    };
+  getUserAnswer() {
+    const { type, selected, selectedList } = this.data;
+    if (type === 'multiple') return selectedList.slice();
+    return selected;
+  },
 
-    if (unanswered > 0) {
-      wx.showModal({
-        title: '还有未作答题目',
-        content: '还有 ' + unanswered + ' 题未填写，确定提交吗？',
-        success: (res) => {
-          if (res.confirm) doSubmit();
-        }
-      });
+  submitAnswer() {
+    if (!this.hasAnswer()) {
+      wx.showToast({ title: '请先选择答案', icon: 'none' });
       return;
     }
 
-    doSubmit();
+    const { current, type } = this.data;
+    const userAnswer = this.getUserAnswer();
+    const question = {
+      ...current,
+      type: type === 'judge' ? 'judge' : current.type,
+      score: 1
+    };
+
+    wx.setStorageSync('questmind_answers_' + current.id, {
+      selected: this.data.selected,
+      selectedList: this.data.selectedList,
+      selectedMap: this.data.selectedMap
+    });
+
+    const result = gradeQuestion(question, userAnswer);
+    const solved = wx.getStorageSync('questmind_solved_count') || 0;
+    wx.setStorageSync('questmind_solved_count', solved + 1);
+
+    let feedback = {
+      title: '已提交',
+      desc: '参考答案待更新，稍后可查看解析。',
+      positive: true
+    };
+
+    if (current.answer != null) {
+      if (result.correct) {
+        feedback = {
+          title: '太棒了!',
+          desc: '你答对了这道题。',
+          positive: true
+        };
+      } else {
+        feedback = {
+          title: '继续加油',
+          desc: '这题已加入错题本，可稍后复习。',
+          positive: false
+        };
+        addRecord({
+          id: current.id + '_' + type,
+          type,
+          questionId: current.id,
+          text: current.text,
+          mastery: 'weak'
+        });
+      }
+    }
+
+    this.setData({
+      submitted: true,
+      feedback,
+      showModal: true
+    });
   },
 
-  retryQuiz() {
-    this.setData({ answers: {}, submitted: false }, () => this.refreshQuestions(false));
+  closeModal() {
+    this.setData({ showModal: false });
+    this.goNext();
+  },
+
+  goPrev() {
+    if (this.data.currentIndex <= 0) return;
+    this.setData({ currentIndex: this.data.currentIndex - 1 }, () => this.loadCurrent());
+  },
+
+  goNext() {
+    if (this.data.currentIndex >= this.data.questions.length - 1) {
+      wx.showToast({ title: '已是最后一题', icon: 'none' });
+      return;
+    }
+    this.setData({ currentIndex: this.data.currentIndex + 1 }, () => this.loadCurrent());
   }
 });

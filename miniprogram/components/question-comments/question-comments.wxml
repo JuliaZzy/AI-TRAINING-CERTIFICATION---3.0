@@ -1,0 +1,86 @@
+<view class="comments-section card">
+  <view class="comments-head">
+    <text class="comments-title">讨论区</text>
+    <text class="comments-count muted">{{totalCount}} 条评论</text>
+  </view>
+
+  <view class="comment-compose">
+    <textarea
+      class="comment-input"
+      placeholder="写下你的想法、解题思路..."
+      value="{{draft}}"
+      bindinput="onDraftInput"
+      maxlength="500"
+      auto-height
+      show-confirm-bar="{{false}}"
+    />
+    <button
+      class="comment-send btn-primary"
+      bindtap="submitComment"
+      disabled="{{!draft.trim() || sending}}"
+      loading="{{sending}}"
+    >发表</button>
+  </view>
+
+  <view wx:if="{{!useCloud}}" class="comments-tip muted">
+    当前为本地评论模式；开通云开发并部署 commentApi 后，所有人可互通评论。
+  </view>
+
+  <view wx:if="{{loading}}" class="comments-state muted">加载评论中...</view>
+  <view wx:elif="{{!threads.length}}" class="comments-state muted">暂无评论，来抢沙发吧</view>
+
+  <block wx:for="{{threads}}" wx:key="id" wx:for-item="thread">
+    <view class="comment-thread">
+      <view class="comment-item">
+        <view class="comment-avatar">{{thread.avatarText}}</view>
+        <view class="comment-body">
+          <view class="comment-meta">
+            <text class="comment-author">{{thread.authorNickname}}</text>
+            <text class="comment-time muted">{{thread.timeText}}</text>
+          </view>
+          <view class="comment-content">{{thread.content}}</view>
+          <text class="comment-reply-btn" bindtap="startReply" data-id="{{thread.id}}">回复</text>
+        </view>
+      </view>
+
+      <view
+        wx:for="{{thread.replies}}"
+        wx:key="id"
+        wx:for-item="reply"
+        class="comment-item comment-reply"
+      >
+        <view class="comment-avatar reply-avatar">{{reply.avatarText}}</view>
+        <view class="comment-body">
+          <view class="comment-meta">
+            <text class="comment-author">{{reply.authorNickname}}</text>
+            <text class="comment-time muted">{{reply.timeText}}</text>
+          </view>
+          <view class="comment-content">{{reply.content}}</view>
+          <text class="comment-reply-btn" bindtap="startReply" data-id="{{thread.id}}">回复</text>
+        </view>
+      </view>
+
+      <view wx:if="{{replyTargetId === thread.id}}" class="reply-compose">
+        <textarea
+          class="comment-input reply-input"
+          placeholder="回复 {{thread.authorNickname}}..."
+          value="{{replyDraft}}"
+          bindinput="onReplyDraftInput"
+          maxlength="500"
+          auto-height
+          show-confirm-bar="{{false}}"
+          focus="{{true}}"
+        />
+        <view class="reply-actions">
+          <button class="reply-cancel" bindtap="cancelReply">取消</button>
+          <button
+            class="comment-send btn-primary reply-send"
+            bindtap="submitReply"
+            disabled="{{!replyDraft.trim() || replying}}"
+            loading="{{replying}}"
+          >回复</button>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

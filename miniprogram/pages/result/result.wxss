@@ -1,106 +1,80 @@
+page {
+  background: #fff8f8;
+  color: #1f1a1c;
+}
+
 .score-card {
   text-align: center;
-  padding: 48rpx 32rpx;
 }
 
 .score-title {
-  font-size: 30rpx;
-  color: #8b9cb3;
-  margin-bottom: 24rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  margin-bottom: 16rpx;
 }
 
 .score-main {
   display: flex;
-  justify-content: center;
   align-items: baseline;
-  margin-bottom: 12rpx;
+  justify-content: center;
+  gap: 8rpx;
 }
 
 .score-num {
-  font-size: 88rpx;
+  font-size: 72rpx;
   font-weight: 700;
-  color: #3b82f6;
-  line-height: 1;
+  color: #a03a57;
 }
 
 .score-slash,
 .score-max {
-  font-size: 40rpx;
-  color: #8b9cb3;
-  margin-left: 8rpx;
+  font-size: 36rpx;
+  color: #887175;
 }
 
 .score-sub {
-  color: #8b9cb3;
-  font-size: 26rpx;
+  color: #887175;
+  margin-top: 8rpx;
 }
 
 .stats {
   display: flex;
-  justify-content: space-between;
-  gap: 16rpx;
+  justify-content: space-around;
 }
 
 .stat-item {
-  flex: 1;
   text-align: center;
-  background: #243044;
-  border-radius: 16rpx;
-  padding: 24rpx 12rpx;
 }
 
 .stat-num {
   font-size: 40rpx;
   font-weight: 700;
-  margin-bottom: 8rpx;
 }
+
+.stat-item.ok .stat-num { color: #674bb5; }
+.stat-item.bad .stat-num { color: #ba1a1a; }
+.stat-item.pending .stat-num { color: #887175; }
 
 .stat-label {
   font-size: 24rpx;
-  color: #8b9cb3;
-}
-
-.stat-item.ok .stat-num {
-  color: #22c55e;
-}
-
-.stat-item.bad .stat-num {
-  color: #ef4444;
-}
-
-.stat-item.pending .stat-num {
-  color: #f59e0b;
-}
-
-.section-title {
-  font-size: 28rpx;
-  color: #8b9cb3;
-  margin: 24rpx 0 20rpx;
+  color: #887175;
 }
 
 .detail-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16rpx;
   margin-bottom: 12rpx;
 }
 
 .status {
-  font-size: 24rpx;
+  font-size: 22rpx;
+  font-weight: 700;
 }
 
-.status.ok {
-  color: #22c55e;
-}
-
-.status.bad {
-  color: #ef4444;
-}
-
-.status.pending {
-  color: #f59e0b;
-}
+.status.ok { color: #674bb5; }
+.status.bad { color: #ba1a1a; }
+.status.pending { color: #887175; }
 
 .detail-text {
   font-size: 28rpx;
@@ -109,14 +83,14 @@
 .detail-answer {
   margin-top: 12rpx;
   font-size: 24rpx;
-  color: #93c5fd;
+  color: #a03a57;
 }
 
 .bottom-actions {
-  padding: 24rpx 0 48rpx;
   display: flex;
   flex-direction: column;
   gap: 16rpx;
+  padding-bottom: 48rpx;
 }
 
 .action-btn {

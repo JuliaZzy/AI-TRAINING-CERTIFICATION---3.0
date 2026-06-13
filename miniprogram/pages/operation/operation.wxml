@@ -1,0 +1,370 @@
+<template name="fieldAnswer">
+  <view wx:if="{{show && text}}" class="field-answer">
+    <text class="field-answer-label">参考答案</text>
+    <text class="field-answer-text">{{text}}</text>
+  </view>
+</template>
+
+<template name="textBlocks">
+  <block wx:for="{{blocks}}" wx:key="index" wx:for-item="block">
+    <view wx:if="{{block.type === 'bullet'}}" class="bullet-item">
+      <view class="bullet-dot"></view>
+      <text class="bullet-text {{textClass}}">{{block.text}}</text>
+    </view>
+    <view wx:elif="{{block.type === 'numbered'}}" class="numbered-item">
+      <text class="numbered-label">（{{block.num}}）</text>
+      <text class="numbered-text {{textClass}}">{{block.text}}</text>
+    </view>
+    <text wx:else class="{{textClass}} para-text">{{block.text}}</text>
+  </block>
+</template>
+
+<view class="page">
+  <custom-nav
+    mode="back"
+    title="{{current ? current.code + ' · 操作题' : '操作题'}}"
+    bind:back="onBack"
+  />
+
+  <scroll-view
+    wx:if="{{current}}"
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+    class="page-scroll"
+  >
+  <view class="container">
+    <view class="quest-card card">
+      <view class="quest-top">
+        <view class="quest-chip">⏱ {{current.time}}</view>
+        <view class="quest-chip quest-chip-score">{{current.totalScore || totalItemScore}} 分</view>
+      </view>
+      <view class="q-meta">
+        <text class="q-icon">✎</text>
+        <text>{{progressText}}</text>
+      </view>
+      <view class="q-title">{{current.name}}</view>
+    </view>
+
+    <block wx:for="{{displayItems}}" wx:key="id" wx:for-item="item">
+      <!-- 工作任务（来自 qustions/*.html） -->
+      <view wx:if="{{item.type === 'intro'}}" class="section card intro-card">
+        <view class="section-label">{{item.title}}</view>
+        <view class="section-body-wrap">
+          <template wx:if="{{item.contentBlocks.length}}" is="textBlocks" data="{{blocks: item.contentBlocks, textClass: 'section-body'}}" />
+          <text wx:else class="section-body para-text">{{item.content}}</text>
+        </view>
+      </view>
+
+      <!-- 代码填空 -->
+      <view wx:elif="{{item.type === 'code'}}" class="item-card card">
+        <view class="item-head">
+          <text class="item-type code">代码填空</text>
+          <text class="item-score">{{item.score}} 分</text>
+        </view>
+        <view class="item-title">{{item.title}}</view>
+        <view class="code-block">
+          <view
+            wx:for="{{item.codeLines}}"
+            wx:key="lineIndex"
+            wx:for-item="line"
+            class="code-row"
+          >
+            <text class="code-ln">{{line.lineIndex + 1}}</text>
+            <view class="code-row-content">
+              <block wx:for="{{line.segments}}" wx:key="segKey" wx:for-item="seg">
+                <text wx:if="{{seg.type === 'text'}}" class="code-text">{{seg.value}}</text>
+                <view wx:else class="code-blank-wrap">
+                  <input
+                    class="code-underline-input"
+                    style="{{seg.blankStyle}}"
+                    value="{{seg.value}}"
+                    placeholder=""
+                    placeholder-style="color: transparent"
+                    disabled="{{submitted}}"
+                    bindinput="onCodeFillInput"
+                    data-item-id="{{item.id}}"
+                    data-index="{{seg.index}}"
+                    adjust-position="{{false}}"
+                    confirm-type="done"
+                  />
+                  <template is="fieldAnswer" data="{{show: submitted, text: seg.answerText}}" />
+                </view>
+              </block>
+            </view>
+          </view>
+        </view>
+        <view wx:for="{{item.blanks}}" wx:key="blankIndex" wx:for-item="blank" class="blank-hint">
+          {{blank.rubricId}} · {{blank.desc}} ({{blank.score}}分)
+        </view>
+      </view>
+
+      <!-- 简答题 / docx 模板 -->
+      <view wx:elif="{{item.type === 'doc'}}" class="item-card card">
+        <view class="item-head">
+          <text class="item-type doc">简答题</text>
+          <text class="item-score">{{item.score}} 分</text>
+        </view>
+        <view class="item-title">{{item.title}}</view>
+        <view wx:if="{{item.docFile}}" class="doc-file">答题卷：{{item.docFile}}</view>
+        <view wx:if="{{item.prompt}}" class="item-prompt-wrap">
+          <template is="textBlocks" data="{{blocks: item.promptBlocks, textClass: 'item-prompt'}}" />
+        </view>
+
+        <view wx:if="{{item.renderSections.length}}" class="answer-sheet">
+          <block wx:for="{{item.renderSections}}" wx:key="index" wx:for-item="sec">
+            <view wx:if="{{sec.type === 'heading'}}" class="sheet-heading">{{sec.text}}</view>
+            <view wx:elif="{{sec.type === 'subheading'}}" class="sheet-subheading">{{sec.text}}</view>
+
+            <view wx:elif="{{sec.type === 'block_title'}}" class="block-title">{{sec.text}}</view>
+            <view wx:elif="{{sec.type === 'text_line'}}" class="doc-text-block">
+              <template is="textBlocks" data="{{blocks: sec.textBlocks, textClass: 'doc-text-line'}}" />
+            </view>
+
+            <view wx:elif="{{sec.type === 'fill_line'}}" class="fill-line {{sec.isBulletLine ? 'fill-line-bullet' : ''}}">
+              <view wx:if="{{sec.isBulletLine}}" class="bullet-dot fill-line-dot"></view>
+              <view class="fill-line-content">
+              <block wx:for="{{sec.segments}}" wx:key="index" wx:for-item="seg">
+                <text wx:if="{{seg.type === 'text'}}" class="fill-text">{{seg.value}}</text>
+                <view wx:else class="fill-blank-wrap">
+                  <textarea
+                    class="underline-input {{seg.fullLine ? 'underline-input-full' : ''}}"
+                    style="{{seg.blankStyle}}"
+                    value="{{seg.value}}"
+                    placeholder=""
+                    disabled="{{submitted}}"
+                    bindinput="onDocFieldInput"
+                    data-item-id="{{item.id}}"
+                    data-field-index="{{seg.fieldIndex}}"
+                    auto-height
+                    maxlength="-1"
+                    show-confirm-bar="{{false}}"
+                  />
+                  <template is="fieldAnswer" data="{{show: submitted, text: seg.answerText}}" />
+                </view>
+              </block>
+              </view>
+            </view>
+
+            <view wx:elif="{{sec.type === 'group_title'}}" class="sheet-group-title">{{sec.text}}</view>
+            <view wx:elif="{{sec.type === 'note'}}" class="sheet-note-wrap">
+              <template is="textBlocks" data="{{blocks: sec.textBlocks, textClass: 'sheet-note'}}" />
+            </view>
+
+            <view wx:elif="{{sec.type === 'input'}}" class="doc-field doc-field-inline">
+              <view class="field-label">{{sec.label}}</view>
+              <textarea
+                class="line-input"
+                style="{{sec.blankStyle}}"
+                value="{{sec.value}}"
+                placeholder="{{sec.placeholder || '请填写'}}"
+                disabled="{{submitted}}"
+                bindinput="onDocFieldInput"
+                data-item-id="{{item.id}}"
+                data-field-index="{{sec.fieldIndex}}"
+                auto-height
+                maxlength="-1"
+                show-confirm-bar="{{false}}"
+              />
+              <template is="fieldAnswer" data="{{show: submitted, text: sec.answerText}}" />
+            </view>
+
+            <view wx:elif="{{sec.type === 'inline_row'}}" class="inline-row">
+              <text class="inline-label">{{sec.label}}</text>
+              <view class="inline-inputs">
+                <view
+                  wx:for="{{sec.inputs}}"
+                  wx:key="fieldIndex"
+                  wx:for-item="cell"
+                  class="inline-input-wrap"
+                >
+                  <textarea
+                    class="inline-input {{cell.fullLine ? 'inline-input-full' : ''}}"
+                    style="{{cell.blankStyle}}"
+                    value="{{cell.value}}"
+                    placeholder="填写"
+                    disabled="{{submitted}}"
+                    bindinput="onDocFieldInput"
+                    data-item-id="{{item.id}}"
+                    data-field-index="{{cell.fieldIndex}}"
+                    auto-height
+                    maxlength="-1"
+                    show-confirm-bar="{{false}}"
+                  />
+                  <template is="fieldAnswer" data="{{show: submitted, text: cell.answerText}}" />
+                </view>
+              </view>
+            </view>
+
+            <view wx:elif="{{sec.type === 'grid_table'}}" class="sheet-table-wrap">
+              <view class="sheet-table">
+                <view class="sheet-table-row sheet-table-header">
+                  <view
+                    wx:for="{{sec.headers}}"
+                    wx:key="*this"
+                    wx:for-item="hdr"
+                    class="sheet-table-cell {{index === 0 ? 'label-cell' : 'input-cell'}}"
+                  >{{hdr}}</view>
+                </view>
+                <view wx:for="{{sec.rows}}" wx:key="label" wx:for-item="row" class="sheet-table-row">
+                  <view class="sheet-table-cell label-cell">{{row.label}}</view>
+                  <view
+                    wx:for="{{row.cells}}"
+                    wx:key="fieldIndex"
+                    wx:for-item="cell"
+                    class="sheet-table-cell input-cell"
+                  >
+                    <textarea
+                      class="table-input {{cell.fullLine ? 'table-input-full' : ''}}"
+                      style="{{cell.blankStyle}}"
+                      value="{{cell.value}}"
+                      placeholder="填写"
+                      disabled="{{submitted}}"
+                      bindinput="onDocFieldInput"
+                      data-item-id="{{item.id}}"
+                      data-field-index="{{cell.fieldIndex}}"
+                      auto-height
+                      maxlength="-1"
+                      show-confirm-bar="{{false}}"
+                    />
+                    <template is="fieldAnswer" data="{{show: submitted, text: cell.answerText}}" />
+                  </view>
+                </view>
+              </view>
+            </view>
+
+            <view wx:elif="{{sec.type === 'table'}}" class="sheet-table-wrap">
+              <view wx:if="{{sec.headers}}" class="sheet-table">
+                <view class="sheet-table-row sheet-table-header">
+                  <view
+                    wx:for="{{sec.headers}}"
+                    wx:key="*this"
+                    wx:for-item="hdr"
+                    class="sheet-table-cell {{index === 0 ? 'label-cell' : 'input-cell'}}"
+                  >{{hdr}}</view>
+                </view>
+                <view wx:for="{{sec.rows}}" wx:key="label" wx:for-item="row" class="sheet-table-row">
+                  <view class="sheet-table-cell label-cell">{{row.label}}</view>
+                  <view
+                    wx:for="{{row.cells}}"
+                    wx:key="fieldIndex"
+                    wx:for-item="cell"
+                    class="sheet-table-cell input-cell"
+                  >
+                    <textarea
+                      class="table-input {{cell.fullLine ? 'table-input-full' : ''}}"
+                      style="{{cell.blankStyle}}"
+                      value="{{cell.value}}"
+                      placeholder="填写"
+                      disabled="{{submitted}}"
+                      bindinput="onDocFieldInput"
+                      data-item-id="{{item.id}}"
+                      data-field-index="{{cell.fieldIndex}}"
+                      auto-height
+                      maxlength="-1"
+                      show-confirm-bar="{{false}}"
+                    />
+                    <template is="fieldAnswer" data="{{show: submitted, text: cell.answerText}}" />
+                  </view>
+                </view>
+              </view>
+
+              <view wx:else class="sheet-table sheet-table-kv">
+                <view wx:for="{{sec.rows}}" wx:key="label" wx:for-item="row" class="sheet-table-row">
+                  <view class="sheet-table-cell label-cell">{{row.label}}</view>
+                  <view
+                    wx:for="{{row.cells}}"
+                    wx:key="fieldIndex"
+                    wx:for-item="cell"
+                    class="sheet-table-cell input-cell"
+                  >
+                    <textarea
+                      class="table-input {{cell.fullLine ? 'table-input-full' : ''}}"
+                      style="{{cell.blankStyle}}"
+                      value="{{cell.value}}"
+                      placeholder="填写"
+                      disabled="{{submitted}}"
+                      bindinput="onDocFieldInput"
+                      data-item-id="{{item.id}}"
+                      data-field-index="{{cell.fieldIndex}}"
+                      auto-height
+                      maxlength="-1"
+                      show-confirm-bar="{{false}}"
+                    />
+                    <template is="fieldAnswer" data="{{show: submitted, text: cell.answerText}}" />
+                  </view>
+                </view>
+              </view>
+            </view>
+
+            <view wx:elif="{{sec.type === 'textarea'}}" class="doc-field">
+              <view class="field-label">{{sec.label}}</view>
+              <textarea
+                class="field-input {{sec.large ? 'field-input-large' : ''}}"
+                placeholder="{{sec.placeholder || '请在此填写'}}"
+                value="{{sec.value}}"
+                disabled="{{submitted}}"
+                bindinput="onDocFieldInput"
+                data-item-id="{{item.id}}"
+                data-field-index="{{sec.fieldIndex}}"
+                auto-height
+                maxlength="-1"
+              />
+              <template is="fieldAnswer" data="{{show: submitted, text: sec.answerText}}" />
+            </view>
+          </block>
+        </view>
+
+        <block wx:else>
+          <view wx:if="{{item.template.paragraphs.length}}" class="template-box">
+            <view class="template-label">答题模板</view>
+            <block wx:for="{{item.template.paragraphs}}" wx:key="index" wx:for-item="para">
+              <text wx:if="{{para.type !== 'table'}}" class="template-para">{{para}}</text>
+            </block>
+          </view>
+
+          <view wx:for="{{item.fields}}" wx:key="index" wx:for-item="field" wx:for-index="fi" class="doc-field">
+            <view class="field-label">{{field.label || field.prefill || ('作答区 ' + (fi + 1))}}</view>
+            <textarea
+              class="field-input"
+              placeholder="{{field.placeholder || '请在此填写'}}"
+              value="{{field.value}}"
+              disabled="{{submitted}}"
+              bindinput="onDocFieldInput"
+              data-item-id="{{item.id}}"
+              data-field-index="{{fi}}"
+              auto-height
+              maxlength="-1"
+            />
+            <template is="fieldAnswer" data="{{show: submitted, text: field.answerText}}" />
+          </view>
+        </block>
+
+        <view wx:for="{{item.rubric}}" wx:key="id" wx:for-item="rub" class="rubric-line">
+          <text class="rubric-id">{{rub.id}}</text>
+          <text class="rubric-desc">{{rub.desc}}</text>
+          <text class="rubric-score">{{rub.score}}分</text>
+        </view>
+      </view>
+    </block>
+
+    <view class="ai-card card" wx:if="{{submitted}}">
+      <view class="ai-head">✦ 提交完成</view>
+      <view class="ai-body">参考答案已显示在各答题框下方，请对照查看。AI 深度解析与自动评分即将上线。</view>
+    </view>
+
+    <button wx:if="{{!submitted}}" class="btn-primary submit-btn" bindtap="submitAnswer">提交答卷</button>
+
+    <question-comments
+      wx:if="{{current}}"
+      question-type="operation"
+      question-id="{{current.id}}"
+    />
+  </view>
+  </scroll-view>
+
+  <view class="bottom-nav">
+    <button class="nav-action btn-secondary" bindtap="goPrev" disabled="{{!canGoPrev}}">‹ 上一题</button>
+    <button class="nav-action btn-primary" bindtap="goNext" disabled="{{!canGoNext}}">下一题 ›</button>
+  </view>
+</view>

@@ -1,15 +1,39 @@
 {
   "pages": [
-    "pages/index/index",
+    "pages/library/library",
+    "pages/wrongbook/wrongbook",
+    "pages/profile/profile",
     "pages/quiz/quiz",
+    "pages/operation/operation",
     "pages/result/result"
   ],
   "window": {
-    "navigationBarTitleText": "AI训练师三级练习",
-    "navigationBarBackgroundColor": "#1a2332",
-    "navigationBarTextStyle": "white",
-    "backgroundColor": "#0f1419",
-    "backgroundTextStyle": "light"
+    "navigationBarTitleText": "QuestMind",
+    "navigationBarBackgroundColor": "#fff8f8",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fff8f8",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#887175",
+    "selectedColor": "#a03a57",
+    "backgroundColor": "#fff8f8",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/library/library",
+        "text": "题库"
+      },
+      {
+        "pagePath": "pages/wrongbook/wrongbook",
+        "text": "错题本"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

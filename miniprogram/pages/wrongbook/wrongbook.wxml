@@ -1,0 +1,93 @@
+<view class="page">
+  <custom-nav mode="brand" title="QuestMind" />
+
+  <view class="container">
+    <view class="header-row">
+      <text class="page-title">错题解析</text>
+      <text class="week-new">本周新增 {{weekNew}} 题</text>
+    </view>
+
+    <view class="stats-card glass-card card">
+      <view class="donut-wrap">
+        <view class="donut">
+          <text class="donut-num">{{stats.total}}</text>
+          <text class="donut-label">总错题</text>
+        </view>
+      </view>
+      <view class="legend">
+        <view class="legend-item">
+          <view class="dot primary"></view>
+          <view>
+            <text class="legend-name">判断题</text>
+            <text class="legend-val">{{stats.judge}}</text>
+          </view>
+        </view>
+        <view class="legend-item">
+          <view class="dot secondary"></view>
+          <view>
+            <text class="legend-name">选择题</text>
+            <text class="legend-val">{{stats.single + stats.multiple}}</text>
+          </view>
+        </view>
+        <view class="legend-item">
+          <view class="dot tertiary"></view>
+          <view>
+            <text class="legend-name">操作题</text>
+            <text class="legend-val">{{stats.operation}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="action-grid">
+      <button class="action-primary" bindtap="startPractice">▶ 进入练习</button>
+      <button class="action-secondary" bindtap="onExportTap">⇪ 导出错题</button>
+    </view>
+
+    <view class="bento-row card glass-card">
+      <view class="bento-icon">◎</view>
+      <view class="bento-text">
+        <view class="bento-title">错题周报</view>
+        <view class="bento-desc">基于 AI 生成的个性化分析</view>
+      </view>
+      <text class="chevron">›</text>
+    </view>
+
+    <view class="mini-grid">
+      <view class="mini-card card">
+        <view class="mini-label">掌握程度分类</view>
+        <view class="mini-row">
+          <text class="weak">薄弱项</text>
+          <text class="mini-num">{{stats.weak}}</text>
+        </view>
+        <view class="bar"><view class="bar-fill weak" style="width: {{stats.total ? stats.weak / stats.total * 100 : 0}}%"></view></view>
+      </view>
+      <view class="mini-card card">
+        <view class="mini-label">巩固建议</view>
+        <view class="suggest">✦ 需加强操作题</view>
+      </view>
+    </view>
+
+    <view class="header-row">
+      <text class="section-heading">最近记录</text>
+    </view>
+
+    <view wx:if="{{records.length === 0}}" class="empty card">
+      <text>还没有错题记录，开始刷题吧！</text>
+    </view>
+
+    <block wx:for="{{records}}" wx:key="id">
+      <view class="record card" bindtap="openRecord" data-item="{{item}}">
+        <view class="record-head">
+          <text class="record-type {{item.type}}">{{item.typeLabel}}</text>
+          <text class="mastery {{item.mastery}}">掌握度: {{item.mastery === 'weak' ? '弱' : item.mastery === 'medium' ? '中' : '强'}}</text>
+        </view>
+        <view class="record-text">{{item.text}}</view>
+        <view class="record-meta">
+          <text>{{item.timeText}}</text>
+          <text>错题 {{item.wrongCount}} 次</text>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

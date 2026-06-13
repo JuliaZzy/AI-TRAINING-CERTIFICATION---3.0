@@ -1,0 +1,19 @@
+<view class="custom-nav" style="{{navWrapStyle}}">
+  <view class="status-bar" style="{{statusBarStyle}}"></view>
+  <view class="nav-bar" style="{{navBarStyle}}">
+    <block wx:if="{{mode === 'brand'}}">
+      <view class="nav-brand-left">
+        <view class="nav-avatar">QM</view>
+        <text class="nav-title">{{title}}</text>
+      </view>
+      <view wx:if="{{showAction}}" class="nav-action">✦</view>
+    </block>
+
+    <block wx:else>
+      <view class="nav-btn" style="{{navBtnStyle}}" bindtap="onBack">‹</view>
+      <text class="nav-title nav-title-back">{{title}}</text>
+      <slot name="right"></slot>
+    </block>
+  </view>
+  <slot name="footer"></slot>
+</view>
